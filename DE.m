@@ -2,8 +2,8 @@ function [ O ] = DE( )
     %DE Summary of this function goes here
     %   Detailed explanation goes here
 
-    % Sin X optimization using DE %
-    % by Kalyan Sourav Dash  %
+    % Learning rate and Threshold value optimization using DE %
+    % by Adrian Newby & Hinal Gohil %
 
     clc;
     clear all;
@@ -40,7 +40,7 @@ function [ O ] = DE( )
     CR=0.8; % crossover ratio defined
     train = ones(n,1)*train;
 
-    Xa=unifrnd (-0.3 , 0.3 , n, 1);%(rand(n,s)-0.3)*pi; % initial population or target vectors
+    Xa=unifrnd (-0.3 , 0.3 , n, 1); % initial population or target vectors
     Xb=unifrnd (-0.024 , 0.024 , n, 76);
     X =[Xa,Xb,train];
     O=zeros(26,21);
@@ -60,12 +60,7 @@ function [ O ] = DE( )
                 Del(i,k)=X(r1,k)-X(r2,k);
                 V(i,k)=X(r1,k)+F*Del(i,k);  % mutant vector
             end
-            %Del(i,1)=X(r1,1)-X(r2,1);
-            %Del(i,2)=X(r1,2)-X(r2,2);
-            %Del(i,3)=X(r1,3)-X(r2,3);
-            %V(i,1)=X(r1,1)+F*Del(i,1);  % mutant vector
-            %V(i,2)=X(r1,2)+F*Del(i,2);  % mutant vector
-            %V(i,3)=X(r1,3)+F*Del(i,3);  % mutant vector
+            
             V(i,78)=train(1);
             r=rand(1);
             if r<CR
@@ -76,8 +71,6 @@ function [ O ] = DE( )
         
         lb = [];
         ub = [];
-        %disp(X);
-
         O = myFun(X(i,:),test);
         O2 = myFun(T(i,:),test);
         option = optimoptions(@lsqcurvefit,'Algorithm','levenberg-marquardt','Display','testing','ScaleProblem','Jacobian');%,'TolFun', 10^(-36),'TolX',10^(-39));
@@ -85,25 +78,17 @@ function [ O ] = DE( )
         [tbad,tresnormbad,tresidual,texitflagbad,toutputbad] = lsqcurvefit(@tempFunc,O2,test,output,lb,ub,option);  % fitness of trial vectors
         Yx(i,1) = xoutputbad.firstorderopt;
         Yt = toutputbad.firstorderopt;
-        disp('xbad');
         disp(Yx);
-        disp('resnorm');
         disp(Yt);
-        disp('residual');
-        %disp(xresidual);
-        disp('outputbad');
-        %disp(xoutputbad.firstorderopt);
-        
-            if Yx(i,1)> Yt
-                X(i,:)=T(i,:);
-                Yx(i,1)=Yt;
-            else
-                X(i,:)=X(i,:);
-            end
+		if Yx(i,1)> Yt
+			X(i,:)=T(i,:);
+			Yx(i,1)=Yt;
+		else
+			X(i,:)=X(i,:);
+		end
        end 
     end
     Yx=sortrows(Yx,1);
-    disp('Optimized value of alpha and Thresholds are: ')
     format longE;
     disp((Yx));
     xlswrite('DEresults.xls',Yx(:,1),1);
@@ -113,10 +98,4 @@ function [ O ] = DE( )
     end
     
     disp(X(Yx(1,2)));
-    %disp(X(1,:));
-    %O = Yx(1,:);
-    %disp(Yx);
-    %plot(Yx(1),output);
-    %disp(Yx(1));  % best value of sin(x) in the range -pi/2 to +pi/2
 end
-
